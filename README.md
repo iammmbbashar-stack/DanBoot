@@ -1,4 +1,4 @@
-# Telegram Prediction Bot
+# DanBoot - Telegram Prediction Bot
 
 Live soccer match prediction bot for Telegram. Scans matches and predicts Over/Under goals.
 
