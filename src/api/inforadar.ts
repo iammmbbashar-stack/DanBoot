@@ -87,39 +87,87 @@ export class InforadarClient {
   }
 
   private parseMatches(data: unknown): Match[] {
-    // TODO: Implement parsing based on actual API response structure
-    // This is a placeholder that expects an array of matches
-    if (!Array.isArray(data)) {
-      logger.warn('Unexpected matches response format');
+    // Handle different response formats
+    if (!data) {
+      logger.warn('Empty matches response');
       return [];
     }
 
-    return data.map((item: any) => ({
-      eventId: item.event_id || item.eventId,
-      homeTeam: item.home_team || item.homeTeam,
-      awayTeam: item.away_team || item.awayTeam,
-      league: item.league || 'Unknown',
-      currentScore: item.score || '0-0',
-      minute: item.minute || 0,
-      oddsHistory: [],
-    }));
+    // If it's an array, process it
+    if (Array.isArray(data)) {
+      return data.map((item: any) => ({
+        eventId: item.event_id || item.eventId || item.id || 0,
+        homeTeam: item.home_team || item.homeTeam || 'Unknown',
+        awayTeam: item.away_team || item.awayTeam || 'Unknown',
+        league: item.league || item.competition || 'Unknown',
+        currentScore: item.score || item.current_score || '0-0',
+        minute: item.minute || item.match_time || 0,
+        oddsHistory: [],
+      }));
+    }
+
+    // If it's an object with matches property
+    if (typeof data === 'object' && !Array.isArray(data)) {
+      const obj = data as any;
+
+      // Try common property names for array of matches
+      const matches = obj.matches || obj.data || obj.games || obj.events;
+      if (Array.isArray(matches)) {
+        return matches.map((item: any) => ({
+          eventId: item.event_id || item.eventId || item.id || 0,
+          homeTeam: item.home_team || item.homeTeam || 'Unknown',
+          awayTeam: item.away_team || item.awayTeam || 'Unknown',
+          league: item.league || item.competition || 'Unknown',
+          currentScore: item.score || item.current_score || '0-0',
+          minute: item.minute || item.match_time || 0,
+          oddsHistory: [],
+        }));
+      }
+    }
+
+    logger.warn('Could not parse matches from response structure', { dataType: typeof data });
+    return [];
   }
 
   private parseOdds(data: unknown): OddsSnapshot[] {
-    // TODO: Implement parsing based on actual API response structure
-    if (!Array.isArray(data)) {
-      logger.warn('Unexpected odds response format');
+    // Handle different response formats
+    if (!data) {
+      logger.warn('Empty odds response');
       return [];
     }
 
-    return data.map((item: any) => ({
-      gameTime: item.game_time || item.gameTime || 0,
-      score: item.score || '0-0',
-      over: item.over,
-      under: item.under,
-      total: item.total,
-      timestamp: item.timestamp || new Date().toISOString(),
-    }));
+    // If it's an array, process it
+    if (Array.isArray(data)) {
+      return data.map((item: any) => ({
+        gameTime: item.game_time || item.gameTime || item.minute || 0,
+        score: item.score || item.current_score || '0-0',
+        over: item.over || item.over_odds || undefined,
+        under: item.under || item.under_odds || undefined,
+        total: item.total || item.total_goals || undefined,
+        timestamp: item.timestamp || item.time || new Date().toISOString(),
+      }));
+    }
+
+    // If it's an object with odds property
+    if (typeof data === 'object' && !Array.isArray(data)) {
+      const obj = data as any;
+
+      // Try common property names for array of odds
+      const odds = obj.odds || obj.data || obj.history || obj.snapshots;
+      if (Array.isArray(odds)) {
+        return odds.map((item: any) => ({
+          gameTime: item.game_time || item.gameTime || item.minute || 0,
+          score: item.score || item.current_score || '0-0',
+          over: item.over || item.over_odds || undefined,
+          under: item.under || item.under_odds || undefined,
+          total: item.total || item.total_goals || undefined,
+          timestamp: item.timestamp || item.time || new Date().toISOString(),
+        }));
+      }
+    }
+
+    logger.warn('Could not parse odds from response structure', { dataType: typeof data });
+    return [];
   }
 }
 
