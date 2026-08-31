@@ -3,6 +3,7 @@ import { logger } from './utils/logger';
 import { inforadarClient } from './api/inforadar';
 import { analyzer } from './predictor/analyzer';
 import { Prediction, PredictionResult } from './types';
+import { getMockMatches } from './api/mockData';
 
 class TelegramBot {
   private bot: Telegraf;
@@ -56,9 +57,17 @@ class TelegramBot {
       // Start periodic scanning
       this.startScanning();
 
-      // Handle graceful shutdown
-      process.once('SIGINT', () => this.bot.stop('SIGINT'));
-      process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
+      // Handle graceful shutdown - stop Telegram polling
+      process.once('SIGINT', async () => {
+        logger.info('SIGINT received, shutting down gracefully');
+        this.stopScanning();
+        await this.bot.stop('SIGINT');
+      });
+      process.once('SIGTERM', async () => {
+        logger.info('SIGTERM received, shutting down gracefully');
+        this.stopScanning();
+        await this.bot.stop('SIGTERM');
+      });
     } catch (error) {
       logger.error({ error }, 'Failed to start bot');
       throw error;
@@ -93,8 +102,14 @@ class TelegramBot {
     try {
       logger.info('Starting match scan and prediction');
 
-      // Fetch live games
-      const matches = await inforadarClient.getLiveGames(1); // 1 = soccer
+      // Fetch live games - use mock data if API fails
+      let matches = await inforadarClient.getLiveGames(1); // 1 = soccer
+
+      if (matches.length === 0) {
+        logger.info('No live matches from API, using mock data for demo');
+        matches = getMockMatches();
+      }
+
       if (matches.length === 0) {
         logger.info('No live matches found');
         return;
@@ -107,11 +122,11 @@ class TelegramBot {
         matches.map(async (match) => {
           try {
             const odds = await inforadarClient.getMatchOdds(match.eventId);
-            return { ...match, oddsHistory: odds };
+            return { ...match, oddsHistory: odds.length > 0 ? odds : match.oddsHistory };
           } catch (error) {
             logger.warn(
               { eventId: match.eventId, error },
-              'Failed to get odds for match',
+              'Failed to get odds for match, using cache',
             );
             return match;
           }
