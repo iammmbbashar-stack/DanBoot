@@ -42,7 +42,9 @@ class TelegramBot {
     });
 
     this.bot.on('message', (ctx) => {
-      logger.debug({ text: ctx.message.text }, 'Received message');
+      if ('text' in ctx.message) {
+        logger.debug({ text: ctx.message.text }, 'Received message');
+      }
     });
   }
 

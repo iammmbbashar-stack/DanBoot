@@ -5,10 +5,8 @@ import { Match, OddsSnapshot } from '../types';
 
 export class InforadarClient {
   private client: AxiosInstance;
-  private baseUrl: string;
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
     this.client = axios.create({
       baseURL: baseUrl,
       timeout: 10000,

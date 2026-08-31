@@ -8,7 +8,7 @@ const limiter = new Bottleneck({
 });
 
 limiter.on('debug', (info) => {
-  if (info.type === 'error') {
+  if (typeof info === 'object' && info !== null && 'type' in info && info.type === 'error') {
     logger.error({ bottleneck: info }, 'Rate limiter error');
   }
 });

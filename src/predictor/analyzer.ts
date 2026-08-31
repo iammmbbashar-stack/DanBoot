@@ -102,12 +102,12 @@ export class PredictionAnalyzer {
 
     // Determine prediction
     const prediction = overScore > underScore ? 'Over' : 'Under';
-    const confidence = Math.abs(overScore - underScore);
+    const confidenceScore = Math.abs(overScore - underScore);
 
     // Only return if confidence > 30
-    if (confidence < 30) {
+    if (confidenceScore < 30) {
       logger.debug(
-        { eventId: match.eventId, confidence },
+        { eventId: match.eventId, confidence: confidenceScore },
         'Low confidence prediction',
       );
       return null;
@@ -115,7 +115,7 @@ export class PredictionAnalyzer {
 
     const reasoning = this.generateReasoning(
       prediction,
-      confidence,
+      confidenceScore,
       overAnalysis,
       underAnalysis,
       match.minute,
@@ -125,7 +125,7 @@ export class PredictionAnalyzer {
       eventId: match.eventId,
       match: `${match.homeTeam} vs ${match.awayTeam}`,
       prediction,
-      confidence: Math.min(confidence, 100),
+      confidence: Math.min(confidenceScore, 100),
       reasoning,
       odds: {
         over: validOdds[validOdds.length - 1].over,
