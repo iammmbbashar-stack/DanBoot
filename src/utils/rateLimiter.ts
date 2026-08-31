@@ -7,8 +7,8 @@ const limiter = new Bottleneck({
   maxConcurrent: 3,
 });
 
-limiter.on('debug', (info) => {
-  if (typeof info === 'object' && info !== null && 'type' in info && info.type === 'error') {
+limiter.on('debug', (info: any) => {
+  if (info && typeof info === 'object' && info.type === 'error') {
     logger.error({ bottleneck: info }, 'Rate limiter error');
   }
 });

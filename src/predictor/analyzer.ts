@@ -137,7 +137,7 @@ export class PredictionAnalyzer {
 
   private generateReasoning(
     prediction: 'Over' | 'Under',
-    confidence: number,
+    _confidence: number,
     overAnalysis: OddsAnalysis,
     underAnalysis: OddsAnalysis,
     minute: number,
