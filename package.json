@@ -1,0 +1,29 @@
+{
+  "name": "telegram-prediction-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for live soccer match predictions (Over/Under)",
+  "main": "dist/bot.js",
+  "scripts": {
+    "dev": "ts-node src/bot.ts",
+    "build": "tsc",
+    "start": "node dist/bot.js",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": ["telegram", "bot", "prediction", "soccer"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "telegraf": "^4.14.0",
+    "axios": "^1.6.0",
+    "bottleneck": "^2.19.0",
+    "dotenv": "^16.3.0",
+    "pino": "^8.16.0",
+    "pino-pretty": "^10.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "typescript": "^5.2.0",
+    "ts-node": "^10.9.0",
+    "tslib": "^2.6.0"
+  }
+}
